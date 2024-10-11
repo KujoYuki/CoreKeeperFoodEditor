@@ -102,6 +102,7 @@
             resultLabel = new Label();
             previousItemButton = new Button();
             nextItemButton = new Button();
+            openConditionsButton = new Button();
             itemEditTabControl.SuspendLayout();
             foodTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)createdNumericNo).BeginInit();
@@ -771,7 +772,7 @@
             savePathTextBox.Name = "savePathTextBox";
             savePathTextBox.Size = new Size(551, 23);
             savePathTextBox.TabIndex = 4;
-            savePathTextBox.TextChanged += savePathTextBox_TextChanged;
+            savePathTextBox.Validating += savePathTextBox_Validating;
             // 
             // saveFolderBrowserDialog
             // 
@@ -846,11 +847,22 @@
             nextItemButton.UseVisualStyleBackColor = true;
             nextItemButton.Click += nextItemButton_Click;
             // 
+            // openConditionsButton
+            // 
+            openConditionsButton.Location = new Point(529, 81);
+            openConditionsButton.Name = "openConditionsButton";
+            openConditionsButton.Size = new Size(104, 23);
+            openConditionsButton.TabIndex = 17;
+            openConditionsButton.Text = "コンディション値";
+            openConditionsButton.UseVisualStyleBackColor = true;
+            openConditionsButton.Click += openConditionsButton_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(660, 374);
+            Controls.Add(openConditionsButton);
             Controls.Add(nextItemButton);
             Controls.Add(previousItemButton);
             Controls.Add(resultLabel);
@@ -957,5 +969,6 @@
         private Label label18;
         private TextBox auxIndexTextBox;
         private Label label17;
+        private Button openConditionsButton;
     }
 }

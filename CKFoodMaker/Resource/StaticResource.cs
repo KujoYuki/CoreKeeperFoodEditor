@@ -1,7 +1,7 @@
 ﻿using CKFoodMaker.Model;
-using System.Collections.ObjectModel;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CKFoodMaker.Resource
 {
@@ -10,7 +10,7 @@ namespace CKFoodMaker.Resource
         public static readonly JsonSerializerOptions SerializerOption = new()
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals,
+            NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals,
         };
 
         public static IReadOnlyCollection<CookedCategory> AllCookedBaseCategories { get; } =

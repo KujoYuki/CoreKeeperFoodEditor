@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Drawing;
 using System.Text.RegularExpressions;
 using CKFoodMaker.Model;
 using CKFoodMaker.Model.ItemAux;
@@ -12,7 +11,7 @@ namespace CKFoodMaker
 
         static readonly string _errorLogFilePath = Path.Combine(Directory.GetCurrentDirectory(), $"ErrorStackTrace.txt");
 
-        private SaveDataManager _saveDataManager = new();
+        private SaveDataManager _saveDataManager = null;
         private List<InternalItemInfo> _materialCategories = [];
         private List<InternalItemInfo> _cookedCategories = [];
 
@@ -201,7 +200,7 @@ namespace CKFoodMaker
 
             // 選択されたセーブデータのファイルのアイテム読み込み
             string selecetedSaveDataPath = Path.Combine(SaveDataFolderPath, saveSlotNoComboBox.SelectedItem?.ToString() + ".json");
-            _saveDataManager = new(selecetedSaveDataPath);
+            _saveDataManager ??= SaveDataManager.GetInstance(selecetedSaveDataPath);
 
             // 選択中のセーブデータのアイテム情報をinventoryIndexComboBoxに反映する
             int indexNo = 1;
@@ -385,7 +384,7 @@ namespace CKFoodMaker
                 }
                 if (_saveDataManager.HasOveredHealth(out int overedHealth))
                 {
-                    MessageBox.Show($"Code : {overedHealth}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Code : {overedHealth}", "体力過剰", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
@@ -395,53 +394,57 @@ namespace CKFoodMaker
             string objectName;
             try
             {
-                if (itemEditTabControl.SelectedIndex is 0)
+                switch (itemEditTabControl.SelectedTab?.Name)
                 {
-                    int materialAId = _materialCategories
+                    case "foodTab":
+                        int materialAId = _materialCategories
                         .Single(c => c.DisplayName == materialComboBoxA
                         .SelectedItem?.ToString()).ObjectID;
-                    int materialBId = _materialCategories
-                        .Single(c => c.DisplayName == materialComboBoxB
-                        .SelectedItem?.ToString()).ObjectID;
-                    int calculatedVariation = CalculateVariation(materialAId, materialBId);
+                        int materialBId = _materialCategories
+                            .Single(c => c.DisplayName == materialComboBoxB
+                            .SelectedItem?.ToString()).ObjectID;
+                        int calculatedVariation = CalculateVariation(materialAId, materialBId);
 
-                    // レア度反映
-                    int baseObjectId = _cookedCategories.Single(c => c.DisplayName == cookedCategoryComboBox.SelectedItem!.ToString()).ObjectID;
-                    DetermineCookedAttributes(baseObjectId, rarityComboBox.SelectedItem?.ToString()!, out int fixedObjectId, out objectName);
-                    item = new(objectID: fixedObjectId,
-                               amount: Convert.ToInt32(createdNumericNo.Value),
-                               variation: calculatedVariation);
-                    _saveDataManager.WriteItemData(inventoryIndexComboBox.SelectedIndex, item, objectName);
-                    result = true;
-                }
-                else if (itemEditTabControl.SelectedIndex is 1)
-                {
-                    // ペットTabの処理
-                    if (!Enum.GetValues(typeof(PetType)).Cast<int>().Contains(int.Parse(objectIdTextBox.Text)))
-                    {
-                        MessageBox.Show("選択中のアイテムがペットではありません。\nインベントリ枠でペットアイテムを選択して編集してください。");
-                        return;
-                    }
-                    var allPetTypes = (PetType[])Enum.GetValues(typeof(PetType));
-                    var allPetColors = (PetColor[])Enum.GetValues(typeof(PetColor));
-                    var auxData = _saveDataManager.GetAuxData(inventoryIndexComboBox.SelectedIndex);
-                    auxData.AuxPrefabManager?.UpdatePet(
-                        petNameTextBox.Text,
-                        allPetColors[petColorComboBox.SelectedIndex],
-                        GeneratePetTalentLists());
-                    item = new(objectID: (int)allPetTypes[petKindComboBox.SelectedIndex],
-                        amount: (int)petExpNumeric.Value,
-                        variation: 0);
-                    objectName = Enum.GetNames(typeof(PetType))[petKindComboBox.SelectedIndex];
+                        // レア度反映
+                        int baseObjectId = _cookedCategories.Single(c => c.DisplayName == cookedCategoryComboBox.SelectedItem!.ToString()).ObjectID;
+                        DetermineCookedAttributes(baseObjectId, rarityComboBox.SelectedItem?.ToString()!, out int fixedObjectId, out objectName);
+                        item = new(objectID: fixedObjectId,
+                                   amount: Convert.ToInt32(createdNumericNo.Value),
+                                   variation: calculatedVariation);
+                        _saveDataManager.WriteItemData(inventoryIndexComboBox.SelectedIndex, item, objectName);
+                        result = true;
+                        break;
 
-                    // ItemAuxDataを込みで書きこむ
-                    result = _saveDataManager.WriteItemData(inventoryIndexComboBox.SelectedIndex, item, objectName, auxData);
-                }
-                else
-                {
-                    item = GenerateItemBase();
-                    objectName = objectNameTextBox.Text;
-                    result = _saveDataManager.WriteItemData(inventoryIndexComboBox.SelectedIndex, item, objectName);
+                    case "petTab":
+                        if (!Enum.GetValues(typeof(PetType)).Cast<int>().Contains(int.Parse(objectIdTextBox.Text)))
+                        {
+                            MessageBox.Show("選択中のアイテムがペットではありません。\nインベントリ枠でペットアイテムを選択して編集してください。");
+                            return;
+                        }
+                        var allPetTypes = (PetType[])Enum.GetValues(typeof(PetType));
+                        var allPetColors = (PetColor[])Enum.GetValues(typeof(PetColor));
+                        var auxData = _saveDataManager.GetAuxData(inventoryIndexComboBox.SelectedIndex);
+                        auxData.AuxPrefabManager?.UpdatePet(
+                            petNameTextBox.Text,
+                            allPetColors[petColorComboBox.SelectedIndex],
+                            GeneratePetTalentLists());
+                        item = new(objectID: (int)allPetTypes[petKindComboBox.SelectedIndex],
+                            amount: (int)petExpNumeric.Value,
+                            variation: 0);
+                        objectName = Enum.GetNames(typeof(PetType))[petKindComboBox.SelectedIndex];
+
+                        // ItemAuxDataを込みで書きこむ
+                        result = _saveDataManager.WriteItemData(inventoryIndexComboBox.SelectedIndex, item, objectName, auxData);
+                        break;
+
+                    case "advancedTab":
+                        item = GenerateItemBase();
+                        objectName = objectNameTextBox.Text;
+                        result = _saveDataManager.WriteItemData(inventoryIndexComboBox.SelectedIndex, item, objectName);
+                        break;
+
+                    default:
+                        throw new InvalidOperationException();
                 }
 
                 if (result)
@@ -610,11 +613,10 @@ namespace CKFoodMaker
             Properties.Settings.Default.Save();
         }
 
-        private void savePathTextBox_TextChanged(object sender, EventArgs e)
+        private void savePathTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
         {
             SaveDataFolderPath = savePathTextBox.Text;
         }
-
         private void previousItemButton_Click(object sender, EventArgs e)
         {
             if (inventoryIndexComboBox.SelectedIndex > 0)
@@ -668,6 +670,12 @@ namespace CKFoodMaker
                 petColorComboBox.Items.Add(StaticResource.PetColorDict[(allPetType[petKindComboBox.SelectedIndex], PetColor.Color_1)]);
             }
             petColorComboBox.SelectedIndex = 0;
+        }
+
+        private void openConditionsButton_Click(object sender, EventArgs e)
+        {
+            var conditionForm = new ConditionForm();
+            conditionForm.ShowDialog();
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using CKFoodMaker.Model;
@@ -11,18 +10,21 @@ namespace CKFoodMaker
     /// <summary>
     /// 単一のセーブデータに対する読み書きモジュール
     /// </summary>
-    public class SaveDataManager
+    public sealed class SaveDataManager
     {
         public static int LoadItemLimit;
+
+        private static SaveDataManager? _singletonInstance;
+
+        public static SaveDataManager GetInstance(string saveDataPath) => _singletonInstance ??= new(saveDataPath);
 
         public string SaveDataPath { get; private set; } = String.Empty;
         public List<(ItemBase item, string objectName, ItemAuxData auxData)> Items { get; private set; } = [];
         private JsonObject SaveData { get; set; }
-        public SaveDataManager()
-        {
-        }
 
-        public SaveDataManager(string saveDataPath)
+        private SaveDataManager() { }
+
+        private SaveDataManager(string saveDataPath)
         {
             SaveDataPath = saveDataPath;
             LoadItemLimit = Program.IsDeveloper ? 86 : 50;
