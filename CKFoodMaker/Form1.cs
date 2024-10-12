@@ -11,7 +11,7 @@ namespace CKFoodMaker
 
         static readonly string _errorLogFilePath = Path.Combine(Directory.GetCurrentDirectory(), $"ErrorStackTrace.txt");
 
-        private SaveDataManager _saveDataManager = null;
+        private SaveDataManager _saveDataManager = SaveDataManager.GetInstance();
         private List<InternalItemInfo> _materialCategories = [];
         private List<InternalItemInfo> _cookedCategories = [];
 
@@ -200,19 +200,19 @@ namespace CKFoodMaker
 
             // 選択されたセーブデータのファイルのアイテム読み込み
             string selecetedSaveDataPath = Path.Combine(SaveDataFolderPath, saveSlotNoComboBox.SelectedItem?.ToString() + ".json");
-            _saveDataManager ??= SaveDataManager.GetInstance(selecetedSaveDataPath);
+            _saveDataManager.SaveDataPath = selecetedSaveDataPath;
 
             // 選択中のセーブデータのアイテム情報をinventoryIndexComboBoxに反映する
             int indexNo = 1;
-            foreach (var itemInfo in _saveDataManager.Items)
+            foreach (var (item, objectName, auxData) in _saveDataManager.Items)
             {
-                if (itemInfo.item == ItemBase.Default)
+                if (item == ItemBase.Default)
                 {
                     inventoryIndexComboBox.Items.Add($"{indexNo,2} : ----");
                 }
                 else
                 {
-                    inventoryIndexComboBox.Items.Add($"{indexNo,2} : {itemInfo.objectName}");
+                    inventoryIndexComboBox.Items.Add($"{indexNo,2} : {objectName}");
                 }
                 indexNo++;
             }
@@ -251,6 +251,10 @@ namespace CKFoodMaker
                     _ => throw new NotImplementedException(),
                 };
                 createdNumericNo.Value = selectedItem.item.amount;
+            }
+            else
+            {
+                ResetFoodTab();
             }
 
             IEnumerable<int> allPetIds = Enum.GetValues(typeof(PetType)).Cast<int>();
@@ -339,6 +343,14 @@ namespace CKFoodMaker
             petTalent7ValidCheckBox.Checked = false;
             petTalent8ValidCheckBox.Checked = false;
             petTalent9ValidCheckBox.Checked = false;
+        }
+
+        private void ResetFoodTab()
+        {
+            materialComboBoxA.SelectedIndex = -1;
+            materialComboBoxB.SelectedIndex = -1;
+            cookedCategoryComboBox.SelectedIndex = -1;
+            rarityComboBox.SelectedIndex = -1;
         }
 
         private void InitLoadedPetTalents(List<PetTalent> talents)
