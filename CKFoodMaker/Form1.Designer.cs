@@ -877,6 +877,7 @@
             Controls.Add(itemEditTabControl);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
             Name = "Form1";
             Text = "CKFoodMaker";
             FormClosing += Form1_FormClosing;

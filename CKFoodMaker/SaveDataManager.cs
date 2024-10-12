@@ -222,7 +222,28 @@ namespace CKFoodMaker
             return conditions;
         }
 
-        public void WriteConditions(IEnumerable<Condition> conditions)
+        public void BackUpConditions(IEnumerable<Condition> conditions, string filePath)
+        {
+            conditions = conditions.OrderBy(c => c.Id).ToList();
+            //hack 例外処理
+
+            var conditionsNode = JsonNode.Parse(JsonSerializer.Serialize(conditions, StaticResource.SerializerOption));
+            string changedJson = JsonSerializer.Serialize(conditionsNode, StaticResource.SerializerOption);
+            changedJson = RestoreJsonString(changedJson);
+            File.WriteAllText(filePath, changedJson);
+        }
+
+        public List<Condition> LoadConditions(string fileName)
+        {
+            //hack 例外処理
+            string jsonString = SanitizeJsonString(File.ReadAllText(fileName));
+            var conditions = JsonSerializer.Deserialize<List<Condition>>(jsonString, StaticResource.SerializerOption)?
+                .OrderBy(c => c.Id)
+                .ToList();
+            return conditions ??= [];
+        }
+
+        public void OverrideConditions(IEnumerable<Condition> conditions)
         {
             _saveData["conditionsList"] = JsonNode.Parse(JsonSerializer.Serialize(conditions, StaticResource.SerializerOption));
             string changedJson = JsonSerializer.Serialize(_saveData, StaticResource.SerializerOption);
