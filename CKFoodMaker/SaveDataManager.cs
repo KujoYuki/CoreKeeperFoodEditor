@@ -19,7 +19,7 @@ namespace CKFoodMaker
 
         private string _saveDataPath = string.Empty;
 
-        private (ItemBase itemBase, string objectName, ItemAuxData auxData) _copiedItem;
+        private (ItemInfo itemBase, string objectName, ItemAuxData auxData) _copiedItem;
         public string SaveDataPath
         {
             get => _saveDataPath;
@@ -32,7 +32,7 @@ namespace CKFoodMaker
             }
         }
 
-        public List<(ItemBase item, string objectName, ItemAuxData auxData)> Items { get; private set; } = [];
+        public List<Item> Items { get; private set; } = [];
         private JsonObject _saveData = [];
 
         private SaveDataManager()
@@ -49,7 +49,7 @@ namespace CKFoodMaker
             return processed.Replace("\"Infinity\"", "Infinity");
         }
 
-        private JsonObject LoadInventory(out List<(ItemBase item, string objectName, ItemAuxData auxData)> items)
+        private JsonObject LoadInventory(out List<Item> items)
         {
             try
             {
@@ -70,14 +70,14 @@ namespace CKFoodMaker
                 items = [];
                 foreach (var (item, objectName, auxData) in limitedItems)
                 {
-                    var itemBase = new ItemBase(
+                    var itemBase = new ItemInfo(
                         objectID: item["objectID"]!.GetValue<int>(),
                         amount: item["amount"]!.GetValue<int>(),
                         variation: item["variation"]!.GetValue<int>(),
                         variationUpdateCount: item["variationUpdateCount"]!.GetValue<int>());
                     string objectInternalName = objectName!.GetValue<string>()!;
                     var itemAux = new ItemAuxData(auxData["index"]!.GetValue<int>(), auxData["data"]!.GetValue<string>());
-                    items.Add((itemBase, objectInternalName, itemAux));
+                    items.Add(new(itemBase, objectInternalName, itemAux));
                 }
 
                 return _saveData;
@@ -95,7 +95,7 @@ namespace CKFoodMaker
         }
 
         // 補助データ込みの書き込みメソッド
-        public bool WriteItemData(int insertIndex, ItemBase itemBase, string objectName, ItemAuxData? auxData = null)
+        public bool WriteItemData(int insertIndex, ItemInfo itemBase, string objectName, ItemAuxData? auxData = null)
         {
             auxData ??= ItemAuxData.Default;
             var success = false;
@@ -158,10 +158,10 @@ namespace CKFoodMaker
         public void ListUncreatedRecipes()
         {
             var allCookedCategoryId = StaticResource.AllCookedBaseCategories
-                .SelectMany(c => new[] { c.ObjectID, c.ObjectID + (int)CookRarity.Rare })
+                .SelectMany(c => new[] { c.Info.objectID, c.Info.objectID + (int)CookRarity.Rare })
                 .OrderBy(id => id)
                 .ToArray();
-            int[] allFoodID = StaticResource.AllFoodMaterials.Select(c => c.objectID).ToArray();
+            int[] allFoodID = StaticResource.AllFoodMaterials.Select(c => c.Info.objectID).ToArray();
             int[] allVariations = allFoodID
                 .SelectMany((ID, index) => allFoodID.Skip(index), Form1.CalculateVariation)
                 .ToArray();
@@ -186,8 +186,8 @@ namespace CKFoodMaker
                 foreach (var variation in exceptRecipe)
                 {
                     Form1.ReverseCalcurateVariation(variation, out int materialIdA, out int materialIdB);
-                    string FoodA = StaticResource.AllFoodMaterials.Single(f => f.objectID == materialIdA).DisplayName;
-                    string FoodB = StaticResource.AllFoodMaterials.Single(f => f.objectID == materialIdB).DisplayName;
+                    string FoodA = StaticResource.AllFoodMaterials.Single(f => f.Info.objectID == materialIdA).DisplayName;
+                    string FoodB = StaticResource.AllFoodMaterials.Single(f => f.Info.objectID == materialIdB).DisplayName;
                     foodBuilder.AppendLine($"{FoodA} + {FoodB}");
                 }
 
@@ -210,7 +210,7 @@ namespace CKFoodMaker
         public void DeleteAllRecipes()
         {
             var allCookedCategoryId = StaticResource.AllCookedBaseCategories
-                .SelectMany(c => new[] { c.ObjectID, c.ObjectID + (int)CookRarity.Rare + (int)CookRarity.Epic })
+                .SelectMany(c => new[] { c.Info.objectID, c.Info.objectID + (int)CookRarity.Rare + (int)CookRarity.Epic })
                 .OrderBy(id => id)
                 .ToList();
             var discoveredObjectWithoutRecipe = _saveData["discoveredObjects2"]!.AsArray()
@@ -273,11 +273,11 @@ namespace CKFoodMaker
         {
             var resultFilePath = Path.Combine(Directory.GetCurrentDirectory(), $"AnalyzeRecipe.txt");
             var allCookedCategoryId = StaticResource.AllCookedBaseCategories
-                .SelectMany(c => new[] { c.ObjectID, c.ObjectID + (int)CookRarity.Rare + (int)CookRarity.Epic })
+                .SelectMany(c => new[] { c.Info.objectID, c.Info.objectID + (int)CookRarity.Rare + (int)CookRarity.Epic })
                 .OrderBy(id => id)
                 .ToList();
             var CookedCategoryCommon = StaticResource.AllCookedBaseCategories
-                .Select(c => c.ObjectID)
+                .Select(c => c.Info.objectID)
                 .ToArray();
             var CookedCategoryRare = CookedCategoryCommon.Select(id => id + (int)CookRarity.Rare).ToArray();
             var CookedCategoryEpic = CookedCategoryCommon.Select(id => id + (int)CookRarity.Epic).ToArray();
@@ -291,36 +291,36 @@ namespace CKFoodMaker
                 .Where(recipe => CookedCategoryCommon.Contains(recipe.objectID))
                 .Select(recipe =>
                 {
-                    var catergoryDisplayName = StaticResource.AllCookedBaseCategories.Single(c => c.ObjectID == recipe.objectID).DisplayName;
+                    var catergoryDisplayName = StaticResource.AllCookedBaseCategories.Single(c => c.Info.objectID == recipe.objectID).DisplayName;
                     Form1.ReverseCalcurateVariation(recipe.variation, out int materialIdA, out int materialIdB);
                     string foodA = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.objectID == materialIdA)?.DisplayName ?? string.Empty;
+                    .Single(f => f.Info.objectID == materialIdA)?.DisplayName ?? string.Empty;
                     string foodB = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.objectID == materialIdB)?.DisplayName ?? string.Empty;
+                    .Single(f => f.Info.objectID == materialIdB)?.DisplayName ?? string.Empty;
                     return $"C:{catergoryDisplayName:10} = {foodA:10} + {foodB:10}";
                 }).ToArray();
             var dicoveredRareRecipe = discoveredAllRecipe
                 .Where(recipe => CookedCategoryRare.Contains(recipe.objectID))
                 .Select(recipe =>
                 {
-                    var catergoryDisplayName = StaticResource.AllCookedBaseCategories.Single(c => c.ObjectID == recipe.objectID).DisplayName;
+                    var catergoryDisplayName = StaticResource.AllCookedBaseCategories.Single(c => c.Info.objectID == recipe.objectID).DisplayName;
                     Form1.ReverseCalcurateVariation(recipe.variation, out int materialIdA, out int materialIdB);
                     string foodA = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.objectID == materialIdA)?.DisplayName ?? string.Empty;
+                    .Single(f => f.Info.objectID == materialIdA)?.DisplayName ?? string.Empty;
                     string foodB = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.objectID == materialIdB)?.DisplayName ?? string.Empty;
+                    .Single(f => f.Info.objectID == materialIdB)?.DisplayName ?? string.Empty;
                     return $"R:{catergoryDisplayName:10} = {foodA:10} + {foodB:10}";
                 }).ToArray();
             var dicoveredEpicRecipe = discoveredAllRecipe
                 .Where(recipe => CookedCategoryEpic.Contains(recipe.objectID))
                 .Select(recipe =>
                 {
-                    var catergoryDisplayName = StaticResource.AllCookedBaseCategories.Single(c => c.ObjectID == recipe.objectID).DisplayName;
+                    var catergoryDisplayName = StaticResource.AllCookedBaseCategories.Single(c => c.Info.objectID == recipe.objectID).DisplayName;
                     Form1.ReverseCalcurateVariation(recipe.variation, out int materialIdA, out int materialIdB);
                     string foodA = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.objectID == materialIdA)?.DisplayName ?? string.Empty;
+                    .Single(f => f.Info.objectID == materialIdA)?.DisplayName ?? string.Empty;
                     string foodB = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.objectID == materialIdB)?.DisplayName ?? string.Empty;
+                    .Single(f => f.Info.objectID == materialIdB)?.DisplayName ?? string.Empty;
                     return $"E{catergoryDisplayName:10} = {foodA:10} + {foodB:10}";
                 }).ToArray();
             var sb = new StringBuilder();
@@ -331,12 +331,12 @@ namespace CKFoodMaker
             File.WriteAllText(resultFilePath, sb.ToString());
         }
 
-        internal void CopyItem(ItemBase itemBase, string objectName, ItemAuxData auxData)
+        internal void CopyItem(ItemInfo itemBase, string objectName, ItemAuxData auxData)
         {
             _copiedItem = (itemBase, objectName, auxData);
         }
 
-        internal (ItemBase itemBase, string objectName, ItemAuxData auxData) PasteItem()
+        internal (ItemInfo itemBase, string objectName, ItemAuxData auxData) PasteItem()
         {
             return (_copiedItem.itemBase, _copiedItem.objectName, _copiedItem.auxData);
         }

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
 using CKFoodMaker.Model;
 using CKFoodMaker.Model.ItemAux;
@@ -12,8 +13,8 @@ namespace CKFoodMaker
         static readonly string _errorLogFilePath = Path.Combine(Directory.GetCurrentDirectory(), $"ErrorStackTrace.txt");
 
         private SaveDataManager _saveDataManager = SaveDataManager.Instance;
-        private List<InternalItemInfo> _materialCategories = [];
-        private List<InternalItemInfo> _cookedCategories = StaticResource.AllCookedBaseCategories.ToList();
+        private List<Item> _materialCategories = [];
+        private List<Item> _cookedCategories = StaticResource.AllCookedBaseCategories.ToList();
 
         private string _saveDataFolderPath = string.Empty;
 
@@ -76,29 +77,22 @@ namespace CKFoodMaker
 
         private void SetMaterialCategory()
         {
-            var defaultMaterials = StaticResource.AllFoodMaterials
-                .Select(c => new InternalItemInfo(c.objectID, c.InternalName, c.DisplayName))
-                .ToArray();
-
             string additionalFoodMaterialFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "AdditionalFoodMaterial.csv")
                 ?? throw new FileNotFoundException($"AdditionalFoodMaterial.csvが見つかりません。");
             var materialCategories = File.ReadAllLines(additionalFoodMaterialFilePath)
                 .Select(line =>
                 {
                     string[] words = line.Split(',');
-                    return new InternalItemInfo(int.Parse(words[0]), words[1], words[2]);
+                    return new Item(int.Parse(words[0]), words[1], words[2]);
                 })
                 .ToArray();
-            var allMaterials = defaultMaterials.Concat(materialCategories)
-                .OrderBy(c => c.ObjectID)
+            var allMaterials = StaticResource.AllFoodMaterials.Concat(materialCategories)
+                .OrderBy(c => c.Info.objectID)
                 .ToList();
             // 開発者モードの場合は非推奨食材も表示
             if (Program.IsDeveloper)
             {
-                var obsoleteFood = StaticResource.ObsoleteFoodMaterials
-                    .Select(c => new InternalItemInfo(c.objectID, c.InternalName, c.DisplayName))
-                    .ToArray();
-                allMaterials.AddRange(obsoleteFood);
+                allMaterials.AddRange(StaticResource.ObsoleteFoodMaterials);
             }
             _materialCategories.AddRange(allMaterials);
 
@@ -221,15 +215,15 @@ namespace CKFoodMaker
 
             // 選択中のセーブデータのアイテム情報をinventoryIndexComboBoxに反映する
             int indexNo = 1;
-            foreach (var (item, objectName, auxData) in _saveDataManager.Items)
+            foreach (var item in _saveDataManager.Items)
             {
-                if (item == ItemBase.Default)
+                if (item.Info == ItemInfo.Default)
                 {
                     inventoryIndexComboBox.Items.Add($"{indexNo,2} : ----");
                 }
                 else
                 {
-                    inventoryIndexComboBox.Items.Add($"{indexNo,2} : {objectName}");
+                    inventoryIndexComboBox.Items.Add($"{indexNo,2} : {item.objectName}");
                 }
                 indexNo++;
             }
@@ -241,23 +235,23 @@ namespace CKFoodMaker
         private void LoadPanel()
         {
             var selectedItem = _saveDataManager.Items[inventoryIndexComboBox.SelectedIndex];
-            int selectedObjectID = selectedItem.item.objectID;
-            int variation = selectedItem.item.variation;
+            int selectedObjectID = selectedItem.Info.objectID;
+            int variation = selectedItem.Info.variation;
 
             objectIdTextBox.Text = selectedObjectID.ToString();
-            amoutTextBox.Text = selectedItem.item.amount.ToString();
+            amoutTextBox.Text = selectedItem.Info.amount.ToString();
             variationTextBox.Text = variation.ToString();
-            variationUpdateCountTextBox.Text = selectedItem.item.variationUpdateCount.ToString();
+            variationUpdateCountTextBox.Text = selectedItem.Info.variationUpdateCount.ToString();
             objectNameTextBox.Text = selectedItem.objectName;
-            auxIndexTextBox.Text = selectedItem.auxData.index.ToString();
-            auxDataTextBox.Text = selectedItem.auxData.data;
+            auxIndexTextBox.Text = selectedItem.Aux.index.ToString();
+            auxDataTextBox.Text = selectedItem.Aux.data;
 
             // 料理の場合は料理情報をセットする
             if (IsCookedItem(selectedObjectID, out var rarity, out var indexBaseOffset))
             {
                 ReverseCalcurateVariation(variation, out var materialIDA, out var materialIDB);
-                materialComboBoxA.SelectedItem = _materialCategories.SingleOrDefault(c => c.ObjectID == materialIDA)?.DisplayName;
-                materialComboBoxB.SelectedItem = _materialCategories.SingleOrDefault(c => c.ObjectID == materialIDB)?.DisplayName;
+                materialComboBoxA.SelectedItem = _materialCategories.SingleOrDefault(c => c.Info.objectID == materialIDA)?.DisplayName;
+                materialComboBoxB.SelectedItem = _materialCategories.SingleOrDefault(c => c.Info.objectID == materialIDB)?.DisplayName;
 
                 cookedCategoryComboBox.SelectedIndex = indexBaseOffset;
                 rarityComboBox.SelectedIndex = rarity switch
@@ -267,14 +261,14 @@ namespace CKFoodMaker
                     CookRarity.Epic => 2,
                     _ => throw new NotImplementedException(),
                 };
-                createdNumericNo.Value = selectedItem.item.amount;
+                createdNumericNo.Value = selectedItem.Info.amount;
             }
 
             IEnumerable<int> allPetIds = Enum.GetValues(typeof(PetType)).Cast<int>();
-            if (allPetIds.Contains(selectedItem.item.objectID))
+            if (allPetIds.Contains(selectedItem.Info.objectID))
             {
                 // ペットの場合はAuxDataをセットする
-                InitLoadedPetTab(selectedItem.auxData, selectedItem.item);
+                InitLoadedPetTab(selectedItem.Aux, selectedItem.Info);
             }
             else
             {
@@ -322,7 +316,7 @@ namespace CKFoodMaker
             }
         }
 
-        private void InitLoadedPetTab(ItemAuxData auxData, ItemBase item)
+        private void InitLoadedPetTab(ItemAuxData auxData, ItemInfo item)
         {
             auxData.GetPetData(out var name, out var color, out var talents);
             petKindComboBox.SelectedIndex = Array.IndexOf(Enum.GetValues(typeof(PetType)).Cast<int>().ToArray(), item.objectID);
@@ -412,7 +406,7 @@ namespace CKFoodMaker
             }
 
             bool result = false;
-            ItemBase item;
+            ItemInfo item;
             string objectName;
             try
             {
@@ -421,14 +415,14 @@ namespace CKFoodMaker
                     case "foodTab":
                         int materialAId = _materialCategories
                         .Single(c => c.DisplayName == materialComboBoxA
-                        .SelectedItem?.ToString()).ObjectID;
+                        .SelectedItem?.ToString()).Info.objectID;
                         int materialBId = _materialCategories
                             .Single(c => c.DisplayName == materialComboBoxB
-                            .SelectedItem?.ToString()).ObjectID;
+                            .SelectedItem?.ToString()).Info.objectID;
                         int calculatedVariation = CalculateVariation(materialAId, materialBId);
 
                         // レア度反映
-                        int baseObjectId = _cookedCategories.Single(c => c.DisplayName == cookedCategoryComboBox.SelectedItem!.ToString()).ObjectID;
+                        int baseObjectId = _cookedCategories.Single(c => c.DisplayName == cookedCategoryComboBox.SelectedItem!.ToString()).Info.objectID;
                         DetermineCookedAttributes(baseObjectId, rarityComboBox.SelectedItem?.ToString()!, out int fixedObjectId, out objectName);
                         item = new(objectID: fixedObjectId,
                                    amount: Convert.ToInt32(createdNumericNo.Value),
@@ -484,7 +478,7 @@ namespace CKFoodMaker
             }
         }
 
-        private ItemBase GenerateItemBase()
+        private ItemInfo GenerateItemBase()
         {
             if (amountConstCheckBox.Checked)
             {
@@ -528,7 +522,7 @@ namespace CKFoodMaker
                 "エピック" => baseObjectId + (int)CookRarity.Epic,
                 _ => throw new ArgumentException(null, nameof(rarity)),
             };
-            string baseInternalName = StaticResource.AllCookedBaseCategories.Single(c => c.ObjectID == baseObjectId).InternalName;
+            string baseInternalName = StaticResource.AllCookedBaseCategories.Single(c => c.Info.objectID == baseObjectId).objectName;
             fixedInternalName = rarity switch
             {
                 "コモン" => baseInternalName,
@@ -557,11 +551,11 @@ namespace CKFoodMaker
 
         private void SetDefaultButton_Click(object sender, EventArgs e)
         {
-            objectIdTextBox.Text = ItemBase.Default.objectID.ToString();
-            variationTextBox.Text = ItemBase.Default.variation.ToString();
+            objectIdTextBox.Text = ItemInfo.Default.objectID.ToString();
+            variationTextBox.Text = ItemInfo.Default.variation.ToString();
             objectNameTextBox.Text = string.Empty;
-            amoutTextBox.Text = ItemBase.Default.amount.ToString();
-            variationUpdateCountTextBox.Text = ItemBase.Default.variationUpdateCount.ToString();
+            amoutTextBox.Text = ItemInfo.Default.amount.ToString();
+            variationUpdateCountTextBox.Text = ItemInfo.Default.variationUpdateCount.ToString();
             auxIndexTextBox.Text = ItemAuxData.Default.index.ToString();
             auxDataTextBox.Text = ItemAuxData.Default.data.ToString();
         }
@@ -584,7 +578,7 @@ namespace CKFoodMaker
         private static bool IsCookedItem(int objectID, out CookRarity rarity, out int indexBaseOffset)
         {
             int[] cookedCategoryAllIds = StaticResource.AllCookedBaseCategories
-                .Select(c => c.ObjectID)
+                .Select(c => c.Info.objectID)
                 .SelectMany(id => new[] { id, id + (int)CookRarity.Rare, id + (int)CookRarity.Epic })
                 .OrderBy(id => id)
                 .ToArray();
@@ -738,7 +732,7 @@ namespace CKFoodMaker
 
         private void CopyButton_Click(object sender, EventArgs e)
         {
-            var baseItem = ItemBase.Default;
+            var baseItem = ItemInfo.Default;
             string objectName = string.Empty;
             var auxData = ItemAuxData.Default;
             try
@@ -761,7 +755,7 @@ namespace CKFoodMaker
 
         private void PaeteButton_Click(object sender, EventArgs e)
         {
-            (ItemBase itemBase, string objectName, ItemAuxData auxData) item = _saveDataManager.PasteItem();
+            (ItemInfo itemBase, string objectName, ItemAuxData auxData) item = _saveDataManager.PasteItem();
             objectIdTextBox.Text = item.itemBase.objectID.ToString();
             amoutTextBox.Text = item.itemBase.amount.ToString();
             variationTextBox.Text = item.itemBase.variation.ToString();
