@@ -43,9 +43,11 @@ namespace CKFoodMaker
             {
                 Text += "(Dev)";
                 variationUpdateCountTextBox.ReadOnly = false;
+                auxIndexTextBox.ReadOnly = false;
                 auxDataTextBox.ReadOnly = false;
                 toMinusOneButton.Visible = true;
                 createdNumericNo.Maximum = 869779;
+                toMaxButton.Text = "869779個";
             }
         }
 
@@ -768,6 +770,36 @@ namespace CKFoodMaker
             auxIndexTextBox.Text = item.auxData.index.ToString();
             auxDataTextBox.Text = item.auxData.data;
             EnableResultMessage($"{item.objectName}をペーストしました。");
+        }
+
+        private void inventryCopyButton_Click(object sender, EventArgs e)
+        {
+            _saveDataManager.CopyInventory();
+            EnableResultMessage("インベントリを全てコピーしました。");
+        }
+
+        private void inventryPasteButton_Click(object sender, EventArgs e)
+        {
+            if (_saveDataManager.HasCopiedInventory())
+            {
+                string assertion = "インベントリ全体をペーストしますか？\n上書きされたアイテムは戻りません。";
+                bool accepet = MessageBox.Show(assertion, "確認", MessageBoxButtons.OKCancel) == DialogResult.OK;
+                if (accepet)
+                {
+                    _saveDataManager.PasteInventory();
+                    EnableResultMessage("インベントリを全てペーストしました。");
+                }
+            }
+        }
+
+        private void openSkillButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("未実装です。\n今後に期待してね！");
+        }
+
+        private void deleteDiscoveredReciepesButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("未実装です。\n今後に期待してね！");
         }
     }
 }

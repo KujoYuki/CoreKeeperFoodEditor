@@ -1,5 +1,4 @@
-﻿using System.Resources.Tools;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using CKFoodMaker.Model;
@@ -340,6 +339,21 @@ namespace CKFoodMaker
         internal (ItemBase itemBase, string objectName, ItemAuxData auxData) PasteItem()
         {
             return (_copiedItem.itemBase, _copiedItem.objectName, _copiedItem.auxData);
+        }
+
+        internal void CopyInventory()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void PasteInventory()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal bool HasCopiedInventory()
+        {
+            throw new NotImplementedException();
         }
     }
 }
