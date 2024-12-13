@@ -371,5 +371,22 @@ namespace CKFoodMaker
         {
             return _copiedInventory is not null;
         }
+
+        internal List<Skill> LoadSkillPoint()
+        {
+            return _saveData["skills"]!.AsArray()
+                .Select(s => JsonSerializer.Deserialize<Skill>(s, StaticResource.SerializerOption)!)
+                .OrderBy(s => s.skillID)
+                .ToList();
+        }
+
+        internal void WriteSkillPoint(IEnumerable<Skill> skills)
+        {
+            _saveData["skills"] = JsonNode.Parse(JsonSerializer.Serialize(skills, StaticResource.SerializerOption));
+
+            string changedJson = JsonSerializer.Serialize(_saveData, StaticResource.SerializerOption);
+            changedJson = RestoreJsonString(changedJson);
+            File.WriteAllText(SaveDataPath, changedJson);
+        }
     }
 }

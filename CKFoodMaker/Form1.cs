@@ -791,12 +791,23 @@ namespace CKFoodMaker
 
         private void openSkillButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("未実装です。\n今後に期待してね！");
+            if (!_saveDataManager.IsClearData())
+            {
+                MessageBox.Show("クリア済みでない場合は機能を制限します。\n通常クリア後にお楽しみください。");
+                return;
+            }
+            if (_saveDataManager.HasOveredHealth(out _) && !Program.IsDeveloper)
+            {
+                MessageBox.Show("体力過剰のため、利用を制限します。", "注意");
+                return;
+            }
+            var skillPointForm = new SkillPointForm();
+            skillPointForm.ShowDialog();
         }
 
         private void deleteDiscoveredReciepesButton_Click(object sender, EventArgs e)
         {
-            string assertion = "未発見のレシピを削除しますか？\n削除したレシピは戻りません。";
+            string assertion = "発見済みのレシピを削除しますか？\n削除したレシピは戻りません。";
             bool accepet = MessageBox.Show(assertion, "確認", MessageBoxButtons.OKCancel) == DialogResult.OK;
             if (accepet) 
             {
