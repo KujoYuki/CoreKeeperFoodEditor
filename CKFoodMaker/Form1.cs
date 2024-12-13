@@ -732,37 +732,35 @@ namespace CKFoodMaker
 
         private void CopyButton_Click(object sender, EventArgs e)
         {
-            var baseItem = ItemInfo.Default;
-            string objectName = string.Empty;
-            var auxData = ItemAuxData.Default;
+            var item = Item.Default;
             try
             {
-                baseItem = new(int.Parse(objectIdTextBox.Text),
+                item.Info = new(int.Parse(objectIdTextBox.Text),
                     int.Parse(amoutTextBox.Text),
                     int.Parse(variationTextBox.Text),
                     int.Parse(variationUpdateCountTextBox.Text));
-                objectName = objectNameTextBox.Text;
-                auxData = new(int.Parse(auxIndexTextBox.Text), auxDataTextBox.Text);
+                item.objectName = objectNameTextBox.Text;
+                item.Aux = new(int.Parse(auxIndexTextBox.Text), auxDataTextBox.Text);
             }
             catch (FormatException)
             {
                 MessageBox.Show("コピーできない値が含まれています。");
                 return;
             }
-            _saveDataManager.CopyItem(baseItem, objectName, auxData);
+            _saveDataManager.CopyItem(item);
             EnableResultMessage($"{objectNameTextBox.Text}をコピーしました。");
         }
 
-        private void PaeteButton_Click(object sender, EventArgs e)
+        private void PasteButton_Click(object sender, EventArgs e)
         {
-            (ItemInfo itemBase, string objectName, ItemAuxData auxData) item = _saveDataManager.PasteItem();
-            objectIdTextBox.Text = item.itemBase.objectID.ToString();
-            amoutTextBox.Text = item.itemBase.amount.ToString();
-            variationTextBox.Text = item.itemBase.variation.ToString();
-            variationUpdateCountTextBox.Text = item.itemBase.variationUpdateCount.ToString();
+            Item item = _saveDataManager.PasteItem();
+            objectIdTextBox.Text = item.Info.objectID.ToString();
+            amoutTextBox.Text = item.Info.amount.ToString();
+            variationTextBox.Text = item.Info.variation.ToString();
+            variationUpdateCountTextBox.Text = item.Info.variationUpdateCount.ToString();
             objectNameTextBox.Text = item.objectName;
-            auxIndexTextBox.Text = item.auxData.index.ToString();
-            auxDataTextBox.Text = item.auxData.data;
+            auxIndexTextBox.Text = item.Aux.index.ToString();
+            auxDataTextBox.Text = item.Aux.data;
             EnableResultMessage($"{item.objectName}をペーストしました。");
         }
 
@@ -782,7 +780,12 @@ namespace CKFoodMaker
                 {
                     _saveDataManager.PasteInventory();
                     EnableResultMessage("インベントリを全てペーストしました。");
+                    LoadItems();
                 }
+            }
+            else
+            {
+                MessageBox.Show("コピーされたインベントリがありません。");
             }
         }
 
@@ -793,7 +796,12 @@ namespace CKFoodMaker
 
         private void deleteDiscoveredReciepesButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("未実装です。\n今後に期待してね！");
+            string assertion = "未発見のレシピを削除しますか？\n削除したレシピは戻りません。";
+            bool accepet = MessageBox.Show(assertion, "確認", MessageBoxButtons.OKCancel) == DialogResult.OK;
+            if (accepet) 
+            {
+                _saveDataManager.DeleteAllRecipes();
+            }
         }
     }
 }

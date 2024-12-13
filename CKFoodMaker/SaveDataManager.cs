@@ -19,7 +19,9 @@ namespace CKFoodMaker
 
         private string _saveDataPath = string.Empty;
 
-        private (ItemInfo itemBase, string objectName, ItemAuxData auxData) _copiedItem;
+        private Item? _copiedItem;
+
+        private Item[]? _copiedInventory;
         public string SaveDataPath
         {
             get => _saveDataPath;
@@ -125,6 +127,16 @@ namespace CKFoodMaker
             File.WriteAllText(SaveDataPath, changedJson);
             success = true;
             return success;
+        }
+
+        public void RewriteAllItemData()
+        {
+            _saveData["inventory"] = JsonNode.Parse(JsonSerializer.Serialize(Items.Select(i => i.Info), StaticResource.SerializerOption));
+            _saveData["inventoryObjectNames"] = JsonNode.Parse(JsonSerializer.Serialize(Items.Select(i => i.objectName), StaticResource.SerializerOption));
+            _saveData["inventoryAuxData"] = JsonNode.Parse(JsonSerializer.Serialize(Items.Select(i => i.Aux), StaticResource.SerializerOption));
+            string changedJson = JsonSerializer.Serialize(_saveData, StaticResource.SerializerOption);
+            changedJson = RestoreJsonString(changedJson);
+            File.WriteAllText(SaveDataPath, changedJson);
         }
 
         public bool IsClearData()
@@ -331,29 +343,33 @@ namespace CKFoodMaker
             File.WriteAllText(resultFilePath, sb.ToString());
         }
 
-        internal void CopyItem(ItemInfo itemBase, string objectName, ItemAuxData auxData)
+        internal void CopyItem(Item item)
         {
-            _copiedItem = (itemBase, objectName, auxData);
+            _copiedItem = item;
         }
 
-        internal (ItemInfo itemBase, string objectName, ItemAuxData auxData) PasteItem()
+        internal Item PasteItem()
         {
-            return (_copiedItem.itemBase, _copiedItem.objectName, _copiedItem.auxData);
+            return _copiedItem ?? Item.Default;
         }
 
         internal void CopyInventory()
         {
-            throw new NotImplementedException();
+            _copiedInventory = Items.ToArray();
         }
 
         internal void PasteInventory()
         {
-            throw new NotImplementedException();
+            if (_copiedInventory is not null)
+            {
+                Items = _copiedInventory.ToList();
+                RewriteAllItemData();
+            }
         }
 
         internal bool HasCopiedInventory()
         {
-            throw new NotImplementedException();
+            return _copiedInventory is not null;
         }
     }
 }

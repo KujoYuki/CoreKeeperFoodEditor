@@ -671,7 +671,7 @@
             itemPasteButton.TabIndex = 27;
             itemPasteButton.Text = "アイテム情報のペースト";
             itemPasteButton.UseVisualStyleBackColor = true;
-            itemPasteButton.Click += PaeteButton_Click;
+            itemPasteButton.Click += PasteButton_Click;
             // 
             // itemCopyButton
             // 

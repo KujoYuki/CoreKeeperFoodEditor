@@ -29,5 +29,7 @@ namespace CKFoodMaker.Model
             Aux = ItemAuxData.Default;
             DisplayName = displayName;
         }
+
+        public static Item Default = new(ItemInfo.Default, string.Empty, ItemAuxData.Default);
     }
 }
