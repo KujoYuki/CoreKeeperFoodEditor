@@ -222,7 +222,7 @@ namespace CKFoodMaker
         public void DeleteAllRecipes()
         {
             var allCookedCategoryId = StaticResource.AllCookedBaseCategories
-                .SelectMany(c => new[] { c.Info.objectID, c.Info.objectID + (int)CookRarity.Rare + (int)CookRarity.Epic })
+                .SelectMany(c => new[] { c.Info.objectID, c.Info.objectID + (int)CookRarity.Rare, c.Info.objectID + (int)CookRarity.Epic })
                 .OrderBy(id => id)
                 .ToList();
             var discoveredObjectWithoutRecipe = _saveData["discoveredObjects2"]!.AsArray()
