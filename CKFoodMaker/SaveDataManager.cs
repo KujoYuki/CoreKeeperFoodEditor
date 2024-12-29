@@ -41,12 +41,12 @@ namespace CKFoodMaker
         {
         }
 
-        private static string SanitizeJsonString(string origin)
+        public static string SanitizeJsonString(string origin)
         {
             return origin.Replace("Infinity", "\"Infinity\"");
         }
 
-        private static string RestoreJsonString(string processed)
+        public static string RestoreJsonString(string processed)
         {
             return processed.Replace("\"Infinity\"", "Infinity");
         }
@@ -278,69 +278,6 @@ namespace CKFoodMaker
             _saveDataPath = Path.Combine(Path.GetDirectoryName(SaveDataPath)!, "debug.json");
 #endif
             File.WriteAllText(SaveDataPath, changedJson);
-        }
-
-        // 既にレシピがおかしいデータへの解析処理
-        private void AnalyzeRecepe()
-        {
-            var resultFilePath = Path.Combine(Directory.GetCurrentDirectory(), $"AnalyzeRecipe.txt");
-            var allCookedCategoryId = StaticResource.AllCookedBaseCategories
-                .SelectMany(c => new[] { c.Info.objectID, c.Info.objectID + (int)CookRarity.Rare + (int)CookRarity.Epic })
-                .OrderBy(id => id)
-                .ToList();
-            var CookedCategoryCommon = StaticResource.AllCookedBaseCategories
-                .Select(c => c.Info.objectID)
-                .ToArray();
-            var CookedCategoryRare = CookedCategoryCommon.Select(id => id + (int)CookRarity.Rare).ToArray();
-            var CookedCategoryEpic = CookedCategoryCommon.Select(id => id + (int)CookRarity.Epic).ToArray();
-
-            List<DiscoveredObjects> discoveredAllRecipe = _saveData["discoveredObjects2"]!.AsArray()
-                .Select(obj => JsonSerializer.Deserialize<DiscoveredObjects>(obj)!)
-                .Where(obj => allCookedCategoryId.Contains(obj.objectID))
-                .ToList();
-
-            var dicoveredCommonRecipe = discoveredAllRecipe
-                .Where(recipe => CookedCategoryCommon.Contains(recipe.objectID))
-                .Select(recipe =>
-                {
-                    var catergoryDisplayName = StaticResource.AllCookedBaseCategories.Single(c => c.Info.objectID == recipe.objectID).DisplayName;
-                    Form1.ReverseCalcurateVariation(recipe.variation, out int materialIdA, out int materialIdB);
-                    string foodA = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.Info.objectID == materialIdA)?.DisplayName ?? string.Empty;
-                    string foodB = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.Info.objectID == materialIdB)?.DisplayName ?? string.Empty;
-                    return $"C:{catergoryDisplayName:10} = {foodA:10} + {foodB:10}";
-                }).ToArray();
-            var dicoveredRareRecipe = discoveredAllRecipe
-                .Where(recipe => CookedCategoryRare.Contains(recipe.objectID))
-                .Select(recipe =>
-                {
-                    var catergoryDisplayName = StaticResource.AllCookedBaseCategories.Single(c => c.Info.objectID == recipe.objectID).DisplayName;
-                    Form1.ReverseCalcurateVariation(recipe.variation, out int materialIdA, out int materialIdB);
-                    string foodA = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.Info.objectID == materialIdA)?.DisplayName ?? string.Empty;
-                    string foodB = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.Info.objectID == materialIdB)?.DisplayName ?? string.Empty;
-                    return $"R:{catergoryDisplayName:10} = {foodA:10} + {foodB:10}";
-                }).ToArray();
-            var dicoveredEpicRecipe = discoveredAllRecipe
-                .Where(recipe => CookedCategoryEpic.Contains(recipe.objectID))
-                .Select(recipe =>
-                {
-                    var catergoryDisplayName = StaticResource.AllCookedBaseCategories.Single(c => c.Info.objectID == recipe.objectID).DisplayName;
-                    Form1.ReverseCalcurateVariation(recipe.variation, out int materialIdA, out int materialIdB);
-                    string foodA = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.Info.objectID == materialIdA)?.DisplayName ?? string.Empty;
-                    string foodB = StaticResource.AllFoodMaterials.Concat(StaticResource.ObsoleteFoodMaterials)
-                    .Single(f => f.Info.objectID == materialIdB)?.DisplayName ?? string.Empty;
-                    return $"E{catergoryDisplayName:10} = {foodA:10} + {foodB:10}";
-                }).ToArray();
-            var sb = new StringBuilder();
-            foreach (var item in dicoveredCommonRecipe.Concat(dicoveredRareRecipe).Concat(dicoveredEpicRecipe))
-            {
-                sb.AppendLine(item.ToString());
-            }
-            File.WriteAllText(resultFilePath, sb.ToString());
         }
 
         internal void CopyItem(Item item)

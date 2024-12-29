@@ -818,6 +818,7 @@ namespace CKFoodMaker
             if (accepet) 
             {
                 _saveDataManager.DeleteAllRecipes();
+                MessageBox.Show("全てのレシピの削除が完了しました。", "確認", MessageBoxButtons.OKCancel);
             }
         }
     }
