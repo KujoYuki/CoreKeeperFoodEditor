@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SkillPointForm));
             skillTableLayoutPanel = new TableLayoutPanel();
             skillPointNumeric1 = new Control.SkillPointNumeric();
             skillPointNumeric2 = new Control.SkillPointNumeric();
@@ -216,11 +217,12 @@
             Controls.Add(resultLabel);
             Controls.Add(applySkillPointButton);
             Controls.Add(skillTableLayoutPanel);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MinimizeBox = false;
             MinimumSize = new Size(442, 420);
             Name = "SkillPointForm";
-            Text = "SkillPointForm";
+            Text = "スキルポイント編集";
             skillTableLayoutPanel.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();

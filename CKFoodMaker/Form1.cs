@@ -39,6 +39,14 @@ namespace CKFoodMaker
         public Form1()
         {
             InitializeComponent();
+            // todo 自動アップデート通知の追加
+            //UpdateChecker.CheckLatestVersionAsync().ContinueWith(task =>
+            //{
+            //    if (task.IsCompletedSuccessfully)
+            //    {
+            //        Invoke(new Action(() => Text += $" - {task.Result}"));
+            //    }
+            //});
             Initialize();
             if (Program.IsDeveloper)
             {
@@ -542,11 +550,24 @@ namespace CKFoodMaker
         {
             // ゲーム内動作に合わせて降順に入れ替え
             if (IdA < IdB) (IdA, IdB) = (IdB, IdA);
-            // 各IDを16進数にし、1つの文字列としてつなげる。
-            string combinedHex = IdA.ToString("X4") + IdB.ToString("X4");
-            // 10進数に戻す
-            var combinedDecimal = Convert.ToInt32(combinedHex, 16);
-            return combinedDecimal;
+
+            // 各IDを16ビットシフトして結合
+            int combined = (IdA << 16) | IdB;
+            return combined;
+        }
+
+        /// <summary>
+        /// variationからIdへの逆算
+        /// </summary>
+        /// <param name="variation"></param>
+        /// <param name="materialA">材料の食材A</param>
+        /// <param name="materialB">材料の食材B</param>
+        public static void ReverseCalcurateVariation(int variation, out int materialA, out int materialB)
+        {
+            // 16ビット右にシフトして上位16ビットを取得
+            materialA = variation >> 16;
+            // 下位16ビットを取得
+            materialB = variation & 0xFFFF;
         }
 
         private void SetDefaultButton_Click(object sender, EventArgs e)
@@ -558,21 +579,6 @@ namespace CKFoodMaker
             variationUpdateCountTextBox.Text = ItemInfo.Default.variationUpdateCount.ToString();
             auxIndexTextBox.Text = ItemAuxData.Default.index.ToString();
             auxDataTextBox.Text = ItemAuxData.Default.data.ToString();
-        }
-
-        /// <summary>
-        /// variationからIdへの逆算
-        /// </summary>
-        /// <param name="variation"></param>
-        /// <param name="materialA">材料の食材A</param>
-        /// <param name="materialB">材料の食材B</param>
-        public static void ReverseCalcurateVariation(int variation, out int materialA, out int materialB)
-        {
-            string combinedHex = variation.ToString("X8");
-            string strA = combinedHex[..4];
-            string strB = combinedHex[4..];
-            materialA = Convert.ToInt32(strA, 16);
-            materialB = Convert.ToInt32(strB, 16);
         }
 
         private static bool IsCookedItem(int objectID, out CookRarity rarity, out int indexBaseOffset)
