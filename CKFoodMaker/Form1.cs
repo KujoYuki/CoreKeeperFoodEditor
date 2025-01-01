@@ -413,6 +413,18 @@ namespace CKFoodMaker
                 }
             }
 
+            // ゲーム本体のプロセスをチェックして、起動中であれば閉じるように促す
+            Process[] processes = Process.GetProcesses();
+            foreach (Process process in processes)
+            {
+                if (process.ProcessName.Equals("CoreKeeper"))
+                {
+                    // ゲームが起動中の場合、メッセージを表示してユーザーに閉じるよう促す
+                    MessageBox.Show("ゲームが起動中です。変更を反映させる前にゲームを終了してください。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
             bool result = false;
             ItemInfo item;
             string objectName;
