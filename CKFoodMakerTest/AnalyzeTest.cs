@@ -29,17 +29,13 @@ namespace CKFoodMakerTest
                 .SelectMany(c => new[] { c.Info.objectID, c.Info.objectID + (int)CookRarity.Rare })
                 .OrderBy(id => id)
                 .ToList();
-            // 料理のレアのカテゴリIDリスト
-            List<int> cookedCategoryRare = StaticResource.AllCookedBaseCategories
-                .Select(c => c.Info.objectID + (int)CookRarity.Rare)
-                .ToList();
 
             // レア化させる食材のIDリスト
-            List<int> rareMaterials = Enumerable.Range(8100, 11).Append(9733).ToList();
+            List<int> rarerizeMaterials = Enumerable.Range(8100, 11).Append(9733).ToList();
 
             // 全ての食材と料理の表示名を取得
             var foodMaterials = StaticResource.AllFoodMaterials
-                .Concat(StaticResource.ObsoleteFoodMaterials)
+                .Concat(StaticResource.ObsoleteFoodMaterials)   // レシピには載らないが料理は作成できるため含める
                 .Select(item => (objectID: item.Info.objectID, DisplayName: item.DisplayName))
                 .ToList();
 
@@ -56,19 +52,25 @@ namespace CKFoodMakerTest
             // 全ての発見済みアイテムからレシピのみを抽出し、表示名を含めてcsv形式のレコード変換
             List<string> discoveredAllRecipe = _saveData["discoveredObjects2"]!.AsArray()
                 .Select(obj => JsonSerializer.Deserialize<DiscoveredObjects>(obj)!)
+                .Where(o => allCookedCategoryId.Contains(o.objectID))   // 非料理アイテムは除外
+                .Where(o => o.variation > 0 && (uint)o.variation <= uint.MaxValue)   // variationが0か32bitで表現できない場合は除外
+                .OrderBy(o => o.variation)
+                .ThenBy(o => o.objectID)
+
+                // 料理の鉄人でレア化されたレシピが含まれている場合は除外
+                // 各グループの最初の要素のみを選択（脱法料理とレアしか知らない料理を除外できないことに注意）
+                .GroupBy(o => o.variation)
+                .Select(g => g.First())
+
+                // 食材に対しての検証
                 .Where(r =>
                 {
-                    // 非料理アイテムは除外
-                    if (!allCookedCategoryId.Contains(r.objectID))
-                    {
-                        return false;
-                    }
                     Form1.ReverseCalcurateVariation(r.variation, out int materialA, out int materialB);
                     int[] materials = [materialA, materialB];
                     foreach (var material in materials)
                     {
-                        // 料理の鉄人でレア化されたレシピが含まれている場合は除外
-                        if (!rareMaterials.Contains(material) && cookedCategoryRare.Contains(r.objectID))
+                        // 食材じゃないものが食材の場合を除外（シーズンアイテム系など）
+                        if (!allFoodMaterials.ContainsKey(material))
                         {
                             return false;
                         }
@@ -85,7 +87,6 @@ namespace CKFoodMakerTest
                 .ThenBy(r => r.materialB)
                 .Select(r => string.Join(',', r.materialA, r.materialB, r.objectID, r.materialNameA, r.materialNameB, r.recepeCategoryName))
                 .ToList();
-
 
             var sb = new StringBuilder();
             sb.AppendLine("食材A_Id,食材B_Id,料理_Id,食材A_名前,食材B_名前,料理名");
