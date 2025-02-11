@@ -201,5 +201,46 @@ namespace CKFoodMaker.Resource
             { (PetType.PetLavaSlimeBlob,PetColor.Color_1) ,"----" },
             { (PetType.PetPrinceSlimeBlob,PetColor.Color_1) ,"----" },
         };
+
+        public static IReadOnlyDictionary<int, string> ExtendSlotName
+            = new Dictionary<int, string>
+            {
+                {51, "Cursor"},
+                {52, "Set1,Helm"},
+                {53, "Set1,Necklace"},
+                {54, "Set1,Breast"},
+                {55, "Set1,Pants"},
+                {56, "Set1,RingA"},
+                {57, "Set1,RingB"},
+                {58, "Set1,OffHand"},
+                {59, "Set1,Bag"},
+                {60, "Sell,Slot1"},
+                {61, "Sell,Slot2"},
+                {62, "Sell,Slot3"},
+                {63, "Sell,Slot4"},
+                {64, "Sell,Slot5"},
+                {65, "Sell,Slot6"},
+                {66, "TrashCan"},
+                {67, "Dresser,Helm"},
+                {68, "Dresser,Breast"},
+                {69, "Dresser,Pants"},
+                {70, "Set2,Helm"},
+                {71, "Set2,Necklace"},
+                {72, "Set2,Breast"},
+                {73, "Set2,Pants"},
+                {74, "Set2,RingA"},
+                {75, "Set2,RingB"},
+                {76, "Set2,OffHand"},
+                {77, "Set2,Helm"},
+                {78, "Set2,Necklace"},
+                {79, "Set2,Breast"},
+                {80, "Set2,Pants"},
+                {81, "Set2,RingA"},
+                {82, "Set2,RingB"},
+                {83, "Set2,OffHand"},
+                {84, "Pet"},
+                {85, "Lantan"},
+                {86, "Upgrade"},
+            };
     }
 }

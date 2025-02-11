@@ -7,6 +7,7 @@ using CKFoodMaker.Resource;
 
 // todo 散らばったFormの統合
 // todo 機能単位のUserControl化
+// hack 非開発者モードの時に上級者タブでauxDataが空だと書き込みできない
 
 namespace CKFoodMaker
 {
@@ -246,18 +247,18 @@ namespace CKFoodMaker
             _saveDataManager.SaveDataPath = selecetedSaveDataPath;
 
             // 選択中のセーブデータのアイテム情報をinventoryIndexComboBoxに反映する
-            int indexNo = 1;
-            foreach (var item in _saveDataManager.Items)
+            for (int i = 0; i < _saveDataManager.Items.Count; i++)
             {
-                if (item.Info == ItemInfo.Default)
+                string indexText = StaticResource.ExtendSlotName.TryGetValue(i + 1, out var rimName) ?
+                    (i + 1) + "," + rimName : (i + 1).ToString();
+                if (_saveDataManager.Items[i].Info == ItemInfo.Default)
                 {
-                    inventoryIndexComboBox.Items.Add($"{indexNo,2} : ----");
+                    inventoryIndexComboBox.Items.Add($"{indexText} : ----");
                 }
                 else
                 {
-                    inventoryIndexComboBox.Items.Add($"{indexNo,2} : {item.objectName}");
+                    inventoryIndexComboBox.Items.Add($"{indexText} : {_saveDataManager.Items[i].objectName}");
                 }
-                indexNo++;
             }
             inventoryIndexComboBox.SelectedIndex = selectedInventoryIndex;
 

@@ -12,7 +12,7 @@ namespace CKFoodMaker
     /// </summary>
     public sealed class SaveDataManager
     {
-        public static int LoadItemLimit;
+        public const int LoadItemLimit = 86;
 
         private static SaveDataManager? _instance;
         public static SaveDataManager Instance => _instance ??= new();
@@ -28,7 +28,6 @@ namespace CKFoodMaker
             set
             {
                 _saveDataPath = value;
-                LoadItemLimit = Program.IsDeveloper ? 86 : 50;
                 _saveData = LoadInventory(out var items);
                 Items = items;
             }
