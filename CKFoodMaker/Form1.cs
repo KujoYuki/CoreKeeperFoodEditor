@@ -1,13 +1,13 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CKFoodMaker.Control;
 using CKFoodMaker.Model;
 using CKFoodMaker.Model.ItemAux;
 using CKFoodMaker.Resource;
 
 // todo 散らばったFormの統合
 // todo 機能単位のUserControl化
-// hack 非開発者モードの時に上級者タブでauxDataが空だと書き込みできない
 
 namespace CKFoodMaker
 {
@@ -58,9 +58,9 @@ namespace CKFoodMaker
         {
             try
             {
-                SetMaterialCategory();
-                SetCookedCategory();
-                SetPetTalentCategory();
+                InitMaterialCategory();
+                InitCookedCategory();
+                InitPetTalentCategory();
                 rarityComboBox.SelectedIndex = 0;
 
                 InitilizeFolderPath();
@@ -108,7 +108,7 @@ namespace CKFoodMaker
             });
         }
 
-        private void SetMaterialCategory()
+        private void InitMaterialCategory()
         {
             string additionalFoodMaterialFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "AdditionalFoodMaterial.csv")
                 ?? throw new FileNotFoundException($"AdditionalFoodMaterial.csvが見つかりません。");
@@ -139,7 +139,7 @@ namespace CKFoodMaker
             materialComboBoxB.SelectedIndex = 0;
         }
 
-        private void SetCookedCategory()
+        private void InitCookedCategory()
         {
             var cookedCategoryNames = StaticResource.AllCookedBaseCategories
                 .Select(c => c.DisplayName)
@@ -148,25 +148,12 @@ namespace CKFoodMaker
             cookedCategoryComboBox.SelectedIndex = 0;
         }
 
-        private void SetPetTalentCategory()
+        private void InitPetTalentCategory()
         {
             var petKinds = Enum.GetNames<PetType>();
             petKindComboBox.Items.AddRange(petKinds);
             var petColors = Enum.GetNames<PetColor>();
             petColorComboBox.Items.AddRange(petColors);
-
-            var TalentIds = StaticResource.PetTalents
-                .Select(t => string.Join(":", t.TalentId, t.Name))
-                .ToArray();
-            petTalent1ComboBox.Items.AddRange(TalentIds);
-            petTalent2ComboBox.Items.AddRange(TalentIds);
-            petTalent3ComboBox.Items.AddRange(TalentIds);
-            petTalent4ComboBox.Items.AddRange(TalentIds);
-            petTalent5ComboBox.Items.AddRange(TalentIds);
-            petTalent6ComboBox.Items.AddRange(TalentIds);
-            petTalent7ComboBox.Items.AddRange(TalentIds);
-            petTalent8ComboBox.Items.AddRange(TalentIds);
-            petTalent9ComboBox.Items.AddRange(TalentIds);
         }
 
         private void InitilizeFolderPath()
@@ -351,60 +338,40 @@ namespace CKFoodMaker
 
         private void InitLoadedPetTab(ItemAuxData auxData, ItemInfo item)
         {
-            auxData.GetPetData(out var name, out var color, out var talents);
+            auxData.GetPetData(out var name, out var color, out List<PetTalent> talents);
             petKindComboBox.SelectedIndex = Array.IndexOf(Enum.GetValues(typeof(PetType)).Cast<int>().ToArray(), item.objectID);
             petColorComboBox.SelectedIndex = color;
             petExpNumeric.Value = item.amount;
             petNameTextBox.Text = name;
 
             InitLoadedPetTalents(talents);
-        }
+            }
 
         private void ResetPetTab()
         {
             petColorComboBox.SelectedIndex = -1;
             petExpNumeric.Value = 0;
             petNameTextBox.Text = string.Empty;
-            petTalent1ComboBox.SelectedIndex = -1;
-            petTalent2ComboBox.SelectedIndex = -1;
-            petTalent3ComboBox.SelectedIndex = -1;
-            petTalent4ComboBox.SelectedIndex = -1;
-            petTalent5ComboBox.SelectedIndex = -1;
-            petTalent6ComboBox.SelectedIndex = -1;
-            petTalent7ComboBox.SelectedIndex = -1;
-            petTalent8ComboBox.SelectedIndex = -1;
-            petTalent9ComboBox.SelectedIndex = -1;
-            petTalent1ValidCheckBox.Checked = false;
-            petTalent2ValidCheckBox.Checked = false;
-            petTalent3ValidCheckBox.Checked = false;
-            petTalent4ValidCheckBox.Checked = false;
-            petTalent5ValidCheckBox.Checked = false;
-            petTalent6ValidCheckBox.Checked = false;
-            petTalent7ValidCheckBox.Checked = false;
-            petTalent8ValidCheckBox.Checked = false;
-            petTalent9ValidCheckBox.Checked = false;
+
+            var petControls = petSkillTableLayoutPanel.Controls.Cast<PetTalentControl>()
+                .OrderBy(control => control.SlotNo)
+                .ToList();
+            foreach (var control in petControls)
+            {
+                control.Reset();
+            }
         }
 
         private void InitLoadedPetTalents(List<PetTalent> talents)
         {
-            petTalent1ValidCheckBox.Checked = talents[0].Points == 1;
-            petTalent1ComboBox.SelectedIndex = talents[0].Talent;
-            petTalent2ValidCheckBox.Checked = talents[1].Points == 1;
-            petTalent2ComboBox.SelectedIndex = talents[1].Talent;
-            petTalent3ValidCheckBox.Checked = talents[2].Points == 1;
-            petTalent3ComboBox.SelectedIndex = talents[2].Talent;
-            petTalent4ValidCheckBox.Checked = talents[3].Points == 1;
-            petTalent4ComboBox.SelectedIndex = talents[3].Talent;
-            petTalent5ValidCheckBox.Checked = talents[4].Points == 1;
-            petTalent5ComboBox.SelectedIndex = talents[4].Talent;
-            petTalent6ValidCheckBox.Checked = talents[5].Points == 1;
-            petTalent6ComboBox.SelectedIndex = talents[5].Talent;
-            petTalent7ValidCheckBox.Checked = talents[6].Points == 1;
-            petTalent7ComboBox.SelectedIndex = talents[6].Talent;
-            petTalent8ValidCheckBox.Checked = talents[7].Points == 1;
-            petTalent8ComboBox.SelectedIndex = talents[7].Talent;
-            petTalent9ValidCheckBox.Checked = talents[8].Points == 1;
-            petTalent9ComboBox.SelectedIndex = talents[8].Talent;
+            var talentContrls = petSkillTableLayoutPanel.Controls.Cast<PetTalentControl>()
+                .OrderBy(control => control.SlotNo)
+                .ToList();
+            
+            for (int i = 0; i < 9; i++)
+            {
+                talentContrls[i].Talent = talents[i];
+            }
         }
 
         private void inventoryIndexComboBox_TextChanged(object sender, EventArgs e)
@@ -535,20 +502,12 @@ namespace CKFoodMaker
 
         private List<PetTalent> GeneratePetTalentLists()
         {
-            List<PetTalent> talentList =
-            [
-                new(petTalent1ComboBox.SelectedIndex, petTalent1ValidCheckBox.Checked is true ? 1 : 0),
-                new(petTalent2ComboBox.SelectedIndex, petTalent2ValidCheckBox.Checked is true ? 1 : 0),
-                new(petTalent3ComboBox.SelectedIndex, petTalent3ValidCheckBox.Checked is true ? 1 : 0),
-                new(petTalent4ComboBox.SelectedIndex, petTalent4ValidCheckBox.Checked is true ? 1 : 0),
-                new(petTalent5ComboBox.SelectedIndex, petTalent5ValidCheckBox.Checked is true ? 1 : 0),
-                new(petTalent6ComboBox.SelectedIndex, petTalent6ValidCheckBox.Checked is true ? 1 : 0),
-                new(petTalent7ComboBox.SelectedIndex, petTalent7ValidCheckBox.Checked is true ? 1 : 0),
-                new(petTalent8ComboBox.SelectedIndex, petTalent8ValidCheckBox.Checked is true ? 1 : 0),
-                new(petTalent9ComboBox.SelectedIndex, petTalent9ValidCheckBox.Checked is true ? 1 : 0),
-            ];
+            var talents = petSkillTableLayoutPanel.Controls.Cast<PetTalentControl>()
+                .OrderBy(control => control.SlotNo)
+                .Select(control => control.Talent)
+                .ToList();
 
-            return talentList;
+            return talents;
         }
 
         private async void EnableResultMessage(string message)

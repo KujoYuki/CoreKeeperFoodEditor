@@ -8,6 +8,8 @@ namespace CKFoodMaker.Model
         public int Talent { get; set; } = 0;
         public int Points {  get; set; } = 0;
 
+        public static PetTalent Default => new(0, 0);
+
         [JsonConstructor]
         public PetTalent(int talent, int points)
         {
