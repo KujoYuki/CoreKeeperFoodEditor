@@ -18,7 +18,7 @@ namespace CKFoodMaker.Control
             set
             {
                 _slotNo = value;
-                petTalentCheckBox.Text = $"スキル {value + 1}";
+                petTalentCheckBox.Text = $"タレント {value + 1}";
             }
         }
 
@@ -38,7 +38,7 @@ namespace CKFoodMaker.Control
 
         public void LoadTalentList()
         {
-            foreach (var item in StaticResource.PetTalents)
+            foreach (var item in PetResource.Talents)
             {
                 petTalentComboBox.Items.Add($"{item.Key}：{item.Value}");
             }

@@ -1,6 +1,6 @@
 ﻿namespace CKFoodMaker.Model
 {
-    public enum PetType
+    public enum PetId
     {
         PetDog = 1222,
         PetCat = 1225,

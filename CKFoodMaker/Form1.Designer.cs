@@ -102,6 +102,8 @@
             nextItemButton = new Button();
             openConditionsButton = new Button();
             openSkillbutton = new Button();
+            label19 = new Label();
+            BattleTypeLabel = new Label();
             itemEditTabControl.SuspendLayout();
             foodTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)createdNumericNo).BeginInit();
@@ -287,6 +289,8 @@
             // 
             // petTab
             // 
+            petTab.Controls.Add(BattleTypeLabel);
+            petTab.Controls.Add(label19);
             petTab.Controls.Add(petSkillTableLayoutPanel);
             petTab.Controls.Add(petNameTextBox);
             petTab.Controls.Add(label16);
@@ -427,7 +431,7 @@
             // 
             // petExpNumeric
             // 
-            petExpNumeric.Location = new Point(391, 9);
+            petExpNumeric.Location = new Point(387, 44);
             petExpNumeric.Maximum = new decimal(new int[] { 107000, 0, 0, 0 });
             petExpNumeric.Name = "petExpNumeric";
             petExpNumeric.Size = new Size(160, 23);
@@ -436,7 +440,7 @@
             // label15
             // 
             label15.AutoSize = true;
-            label15.Location = new Point(342, 12);
+            label15.Location = new Point(338, 47);
             label15.Name = "label15";
             label15.Size = new Size(43, 15);
             label15.TabIndex = 5;
@@ -465,7 +469,7 @@
             // 
             petColorComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             petColorComboBox.FormattingEnabled = true;
-            petColorComboBox.Location = new Point(224, 9);
+            petColorComboBox.Location = new Point(450, 9);
             petColorComboBox.Name = "petColorComboBox";
             petColorComboBox.Size = new Size(97, 23);
             petColorComboBox.TabIndex = 2;
@@ -473,7 +477,7 @@
             // label13
             // 
             label13.AutoSize = true;
-            label13.Location = new Point(205, 12);
+            label13.Location = new Point(431, 12);
             label13.Name = "label13";
             label13.Size = new Size(19, 15);
             label13.TabIndex = 0;
@@ -857,6 +861,24 @@
             openSkillbutton.UseVisualStyleBackColor = false;
             openSkillbutton.Click += openSkillButton_Click;
             // 
+            // label19
+            // 
+            label19.AutoSize = true;
+            label19.Location = new Point(206, 12);
+            label19.Name = "label19";
+            label19.Size = new Size(81, 15);
+            label19.TabIndex = 27;
+            label19.Text = "タレントタイプ：";
+            // 
+            // BattleTypeLabel
+            // 
+            BattleTypeLabel.AutoSize = true;
+            BattleTypeLabel.Location = new Point(283, 12);
+            BattleTypeLabel.Name = "BattleTypeLabel";
+            BattleTypeLabel.Size = new Size(83, 15);
+            BattleTypeLabel.TabIndex = 28;
+            BattleTypeLabel.Text = "TalentTypeText";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -972,5 +994,7 @@
         private Control.PetTalentControl petTalentControl6;
         private Control.PetTalentControl petTalentControl7;
         private Control.PetTalentControl petTalentControl8;
+        private Label BattleTypeLabel;
+        private Label label19;
     }
 }
