@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CKFoodMaker.Model
+namespace CKFoodMaker.Model.Pet
 {
     public record Pet
     {
@@ -35,7 +35,7 @@ namespace CKFoodMaker.Model
         public Pet()
         {
             Id = PetId.PetDog;
-            Color = PetColor.Color_1;
+            Color = PetColor.Color_0;
             Name = string.Empty;
             Talents = new PetTalent[9];
         }

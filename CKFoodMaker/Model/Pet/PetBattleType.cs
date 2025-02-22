@@ -1,4 +1,4 @@
-﻿namespace CKFoodMaker.Model
+﻿namespace CKFoodMaker.Model.Pet
 {
     /// <summary>
     /// ペットの戦闘タイプ

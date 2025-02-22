@@ -1,4 +1,5 @@
-﻿using CKFoodMaker.Resource;
+﻿using CKFoodMaker.Model.Pet;
+using CKFoodMaker.Resource;
 using System.Text.Json.Nodes;
 
 namespace CKFoodMaker.Model.ItemAux

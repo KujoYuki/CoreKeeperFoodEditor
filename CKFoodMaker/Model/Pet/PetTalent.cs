@@ -1,12 +1,12 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CKFoodMaker.Model
+namespace CKFoodMaker.Model.Pet
 {
     public record PetTalent
     {
         public int Talent { get; set; } = 0;
-        public int Points {  get; set; } = 0;
+        public int Points { get; set; } = 0;
 
         public static PetTalent Default => new(0, 0);
 

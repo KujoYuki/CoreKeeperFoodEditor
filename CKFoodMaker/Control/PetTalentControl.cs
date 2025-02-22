@@ -1,4 +1,4 @@
-﻿using CKFoodMaker.Model;
+﻿using CKFoodMaker.Model.Pet;
 using CKFoodMaker.Resource;
 
 namespace CKFoodMaker.Control

@@ -46,24 +46,7 @@
             materialComboBoxA = new ComboBox();
             label4 = new Label();
             petTab = new TabPage();
-            petSkillTableLayoutPanel = new TableLayoutPanel();
-            petTalentControl0 = new Control.PetTalentControl();
-            petTalentControl8 = new Control.PetTalentControl();
-            petTalentControl7 = new Control.PetTalentControl();
-            petTalentControl6 = new Control.PetTalentControl();
-            petTalentControl5 = new Control.PetTalentControl();
-            petTalentControl4 = new Control.PetTalentControl();
-            petTalentControl3 = new Control.PetTalentControl();
-            petTalentControl2 = new Control.PetTalentControl();
-            petTalentControl1 = new Control.PetTalentControl();
-            petNameTextBox = new TextBox();
-            label16 = new Label();
-            petExpNumeric = new NumericUpDown();
-            label15 = new Label();
-            petKindComboBox = new ComboBox();
-            label14 = new Label();
-            petColorComboBox = new ComboBox();
-            label13 = new Label();
+            petEditControl = new Control.PetEditControl();
             advancedTab = new TabPage();
             inventryPasteButton = new Button();
             inventryCopyButton = new Button();
@@ -102,14 +85,10 @@
             nextItemButton = new Button();
             openConditionsButton = new Button();
             openSkillbutton = new Button();
-            label19 = new Label();
-            BattleTypeLabel = new Label();
             itemEditTabControl.SuspendLayout();
             foodTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)createdNumericNo).BeginInit();
             petTab.SuspendLayout();
-            petSkillTableLayoutPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)petExpNumeric).BeginInit();
             advancedTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)amountConst).BeginInit();
             SuspendLayout();
@@ -289,17 +268,7 @@
             // 
             // petTab
             // 
-            petTab.Controls.Add(BattleTypeLabel);
-            petTab.Controls.Add(label19);
-            petTab.Controls.Add(petSkillTableLayoutPanel);
-            petTab.Controls.Add(petNameTextBox);
-            petTab.Controls.Add(label16);
-            petTab.Controls.Add(petExpNumeric);
-            petTab.Controls.Add(label15);
-            petTab.Controls.Add(petKindComboBox);
-            petTab.Controls.Add(label14);
-            petTab.Controls.Add(petColorComboBox);
-            petTab.Controls.Add(label13);
+            petTab.Controls.Add(petEditControl);
             petTab.Location = new Point(4, 24);
             petTab.Name = "petTab";
             petTab.Padding = new Padding(3);
@@ -308,180 +277,13 @@
             petTab.Text = "ペット";
             petTab.UseVisualStyleBackColor = true;
             // 
-            // petSkillTableLayoutPanel
+            // petEditControl
             // 
-            petSkillTableLayoutPanel.ColumnCount = 3;
-            petSkillTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33222F));
-            petSkillTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.335556F));
-            petSkillTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33222F));
-            petSkillTableLayoutPanel.Controls.Add(petTalentControl0, 0, 0);
-            petSkillTableLayoutPanel.Controls.Add(petTalentControl8, 2, 2);
-            petSkillTableLayoutPanel.Controls.Add(petTalentControl7, 1, 2);
-            petSkillTableLayoutPanel.Controls.Add(petTalentControl6, 0, 2);
-            petSkillTableLayoutPanel.Controls.Add(petTalentControl5, 2, 1);
-            petSkillTableLayoutPanel.Controls.Add(petTalentControl4, 1, 1);
-            petSkillTableLayoutPanel.Controls.Add(petTalentControl3, 0, 1);
-            petSkillTableLayoutPanel.Controls.Add(petTalentControl2, 2, 0);
-            petSkillTableLayoutPanel.Controls.Add(petTalentControl1, 1, 0);
-            petSkillTableLayoutPanel.Location = new Point(7, 82);
-            petSkillTableLayoutPanel.Name = "petSkillTableLayoutPanel";
-            petSkillTableLayoutPanel.RowCount = 3;
-            petSkillTableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33333F));
-            petSkillTableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
-            petSkillTableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
-            petSkillTableLayoutPanel.Size = new Size(626, 183);
-            petSkillTableLayoutPanel.TabIndex = 19;
-            // 
-            // petTalentControl0
-            // 
-            petTalentControl0.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            petTalentControl0.Location = new Point(3, 3);
-            petTalentControl0.Name = "petTalentControl0";
-            petTalentControl0.Size = new Size(202, 55);
-            petTalentControl0.SlotNo = 0;
-            petTalentControl0.TabIndex = 9;
-            // 
-            // petTalentControl8
-            // 
-            petTalentControl8.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            petTalentControl8.Location = new Point(419, 125);
-            petTalentControl8.Name = "petTalentControl8";
-            petTalentControl8.Size = new Size(204, 55);
-            petTalentControl8.SlotNo = 8;
-            petTalentControl8.TabIndex = 8;
-            // 
-            // petTalentControl7
-            // 
-            petTalentControl7.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            petTalentControl7.Location = new Point(211, 125);
-            petTalentControl7.Name = "petTalentControl7";
-            petTalentControl7.Size = new Size(202, 55);
-            petTalentControl7.SlotNo = 7;
-            petTalentControl7.TabIndex = 7;
-            // 
-            // petTalentControl6
-            // 
-            petTalentControl6.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            petTalentControl6.Location = new Point(3, 125);
-            petTalentControl6.Name = "petTalentControl6";
-            petTalentControl6.Size = new Size(202, 55);
-            petTalentControl6.SlotNo = 6;
-            petTalentControl6.TabIndex = 6;
-            // 
-            // petTalentControl5
-            // 
-            petTalentControl5.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            petTalentControl5.Location = new Point(419, 64);
-            petTalentControl5.Name = "petTalentControl5";
-            petTalentControl5.Size = new Size(204, 55);
-            petTalentControl5.SlotNo = 5;
-            petTalentControl5.TabIndex = 5;
-            // 
-            // petTalentControl4
-            // 
-            petTalentControl4.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            petTalentControl4.Location = new Point(211, 64);
-            petTalentControl4.Name = "petTalentControl4";
-            petTalentControl4.Size = new Size(202, 55);
-            petTalentControl4.SlotNo = 4;
-            petTalentControl4.TabIndex = 4;
-            // 
-            // petTalentControl3
-            // 
-            petTalentControl3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            petTalentControl3.Location = new Point(3, 64);
-            petTalentControl3.Name = "petTalentControl3";
-            petTalentControl3.Size = new Size(202, 55);
-            petTalentControl3.SlotNo = 3;
-            petTalentControl3.TabIndex = 3;
-            // 
-            // petTalentControl2
-            // 
-            petTalentControl2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            petTalentControl2.Location = new Point(419, 3);
-            petTalentControl2.Name = "petTalentControl2";
-            petTalentControl2.Size = new Size(204, 55);
-            petTalentControl2.SlotNo = 2;
-            petTalentControl2.TabIndex = 2;
-            // 
-            // petTalentControl1
-            // 
-            petTalentControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            petTalentControl1.Location = new Point(211, 3);
-            petTalentControl1.Name = "petTalentControl1";
-            petTalentControl1.Size = new Size(202, 55);
-            petTalentControl1.SlotNo = 1;
-            petTalentControl1.TabIndex = 1;
-            // 
-            // petNameTextBox
-            // 
-            petNameTextBox.Location = new Point(44, 43);
-            petNameTextBox.Name = "petNameTextBox";
-            petNameTextBox.Size = new Size(277, 23);
-            petNameTextBox.TabIndex = 26;
-            // 
-            // label16
-            // 
-            label16.AutoSize = true;
-            label16.Location = new Point(7, 47);
-            label16.Name = "label16";
-            label16.Size = new Size(31, 15);
-            label16.TabIndex = 25;
-            label16.Text = "名前";
-            // 
-            // petExpNumeric
-            // 
-            petExpNumeric.Location = new Point(387, 44);
-            petExpNumeric.Maximum = new decimal(new int[] { 107000, 0, 0, 0 });
-            petExpNumeric.Name = "petExpNumeric";
-            petExpNumeric.Size = new Size(160, 23);
-            petExpNumeric.TabIndex = 6;
-            // 
-            // label15
-            // 
-            label15.AutoSize = true;
-            label15.Location = new Point(338, 47);
-            label15.Name = "label15";
-            label15.Size = new Size(43, 15);
-            label15.TabIndex = 5;
-            label15.Text = "経験値";
-            // 
-            // petKindComboBox
-            // 
-            petKindComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            petKindComboBox.FormattingEnabled = true;
-            petKindComboBox.Location = new Point(44, 9);
-            petKindComboBox.Name = "petKindComboBox";
-            petKindComboBox.Size = new Size(140, 23);
-            petKindComboBox.TabIndex = 4;
-            petKindComboBox.SelectedIndexChanged += petKindComboBox_SelectedIndexChanged;
-            // 
-            // label14
-            // 
-            label14.AutoSize = true;
-            label14.Location = new Point(7, 12);
-            label14.Name = "label14";
-            label14.Size = new Size(31, 15);
-            label14.TabIndex = 3;
-            label14.Text = "種類";
-            // 
-            // petColorComboBox
-            // 
-            petColorComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            petColorComboBox.FormattingEnabled = true;
-            petColorComboBox.Location = new Point(450, 9);
-            petColorComboBox.Name = "petColorComboBox";
-            petColorComboBox.Size = new Size(97, 23);
-            petColorComboBox.TabIndex = 2;
-            // 
-            // label13
-            // 
-            label13.AutoSize = true;
-            label13.Location = new Point(431, 12);
-            label13.Name = "label13";
-            label13.Size = new Size(19, 15);
-            label13.TabIndex = 0;
-            label13.Text = "色";
+            petEditControl.Dock = DockStyle.Fill;
+            petEditControl.Location = new Point(3, 3);
+            petEditControl.Name = "petEditControl";
+            petEditControl.Size = new Size(635, 269);
+            petEditControl.TabIndex = 0;
             // 
             // advancedTab
             // 
@@ -861,24 +663,6 @@
             openSkillbutton.UseVisualStyleBackColor = false;
             openSkillbutton.Click += openSkillButton_Click;
             // 
-            // label19
-            // 
-            label19.AutoSize = true;
-            label19.Location = new Point(206, 12);
-            label19.Name = "label19";
-            label19.Size = new Size(81, 15);
-            label19.TabIndex = 27;
-            label19.Text = "タレントタイプ：";
-            // 
-            // BattleTypeLabel
-            // 
-            BattleTypeLabel.AutoSize = true;
-            BattleTypeLabel.Location = new Point(283, 12);
-            BattleTypeLabel.Name = "BattleTypeLabel";
-            BattleTypeLabel.Size = new Size(83, 15);
-            BattleTypeLabel.TabIndex = 28;
-            BattleTypeLabel.Text = "TalentTypeText";
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -909,9 +693,6 @@
             foodTab.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)createdNumericNo).EndInit();
             petTab.ResumeLayout(false);
-            petTab.PerformLayout();
-            petSkillTableLayoutPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)petExpNumeric).EndInit();
             advancedTab.ResumeLayout(false);
             advancedTab.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)amountConst).EndInit();
@@ -963,14 +744,6 @@
         private NumericUpDown amountConst;
         private CheckBox amountConstCheckBox;
         private TabPage petTab;
-        private Label label13;
-        private ComboBox petKindComboBox;
-        private Label label14;
-        private ComboBox petColorComboBox;
-        private NumericUpDown petExpNumeric;
-        private Label label15;
-        private TextBox petNameTextBox;
-        private Label label16;
         private Button listUncreatedRecipesButton;
         private TextBox auxDataTextBox;
         private Label label18;
@@ -984,17 +757,6 @@
         private Button inventryCopyButton;
         private Button openSkillbutton;
         private Button deleteDiscoveredReciepesButton;
-        private TableLayoutPanel petSkillTableLayoutPanel;
-        private Control.PetTalentControl petTalentControl0;
-        private Control.PetTalentControl petTalentControl1;
-        private Control.PetTalentControl petTalentControl2;
-        private Control.PetTalentControl petTalentControl3;
-        private Control.PetTalentControl petTalentControl4;
-        private Control.PetTalentControl petTalentControl5;
-        private Control.PetTalentControl petTalentControl6;
-        private Control.PetTalentControl petTalentControl7;
-        private Control.PetTalentControl petTalentControl8;
-        private Label BattleTypeLabel;
-        private Label label19;
+        private Control.PetEditControl petEditControl;
     }
 }

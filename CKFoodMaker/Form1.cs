@@ -1,9 +1,8 @@
 using System.Diagnostics;
-using System.Linq;
 using System.Text.RegularExpressions;
-using CKFoodMaker.Control;
 using CKFoodMaker.Model;
 using CKFoodMaker.Model.ItemAux;
+using CKFoodMaker.Model.Pet;
 using CKFoodMaker.Resource;
 
 // todo 経験値テーブルの解析とNumericをポイントからLvに
@@ -62,7 +61,6 @@ namespace CKFoodMaker
             {
                 InitMaterialCategory();
                 InitCookedCategory();
-                InitPetTalentCategory();
                 rarityComboBox.SelectedIndex = 0;
 
                 InitilizeFolderPath();
@@ -148,14 +146,6 @@ namespace CKFoodMaker
                 .ToArray();
             cookedCategoryComboBox.Items.AddRange(cookedCategoryNames);
             cookedCategoryComboBox.SelectedIndex = 0;
-        }
-
-        private void InitPetTalentCategory()
-        {
-            var petKinds = Enum.GetNames<PetId>();
-            petKindComboBox.Items.AddRange(petKinds);
-            var petColors = Enum.GetNames<PetColor>();
-            petColorComboBox.Items.AddRange(petColors);
         }
 
         private void InitilizeFolderPath()
@@ -286,16 +276,7 @@ namespace CKFoodMaker
                 createdNumericNo.Value = selectedItem.Info.amount;
             }
 
-            IEnumerable<int> allPetIds = Enum.GetValues(typeof(PetId)).Cast<int>();
-            if (allPetIds.Contains(selectedItem.Info.objectID))
-            {
-                // ペットの場合はAuxDataをセットする
-                InitLoadedPetTab(selectedItem.Aux, selectedItem.Info);
-            }
-            else
-            {
-                ResetPetTab();
-            }
+            petEditControl.PetItem = selectedItem;
         }
 
         private void saveSlotNoComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -335,44 +316,6 @@ namespace CKFoodMaker
             if (Directory.Exists(SaveDataFolderPath))
             {
                 LoadSlots();
-            }
-        }
-
-        private void InitLoadedPetTab(ItemAuxData auxData, ItemInfo item)
-        {
-            auxData.GetPetData(out var name, out var color, out List<PetTalent> talents);
-            petKindComboBox.SelectedIndex = Array.IndexOf(Enum.GetValues(typeof(PetId)).Cast<int>().ToArray(), item.objectID);
-            petColorComboBox.SelectedIndex = color;
-            petExpNumeric.Value = item.amount;
-            petNameTextBox.Text = name;
-
-            InitLoadedPetTalents(talents);
-            }
-
-        private void ResetPetTab()
-        {
-            petColorComboBox.SelectedIndex = -1;
-            petExpNumeric.Value = 0;
-            petNameTextBox.Text = string.Empty;
-
-            var petControls = petSkillTableLayoutPanel.Controls.Cast<PetTalentControl>()
-                .OrderBy(control => control.SlotNo)
-                .ToList();
-            foreach (var control in petControls)
-            {
-                control.Reset();
-            }
-        }
-
-        private void InitLoadedPetTalents(List<PetTalent> talents)
-        {
-            var talentContrls = petSkillTableLayoutPanel.Controls.Cast<PetTalentControl>()
-                .OrderBy(control => control.SlotNo)
-                .ToList();
-            
-            for (int i = 0; i < 9; i++)
-            {
-                talentContrls[i].Talent = talents[i];
             }
         }
 
@@ -451,20 +394,11 @@ namespace CKFoodMaker
                             MessageBox.Show("選択中のアイテムがペットではありません。\nインベントリ枠でペットアイテムを選択して編集してください。");
                             return;
                         }
-                        var allPetTypes = (PetId[])Enum.GetValues(typeof(PetId));
-                        var allPetColors = (PetColor[])Enum.GetValues(typeof(PetColor));
-                        var auxData = _saveDataManager.GetAuxData(inventoryIndexComboBox.SelectedIndex);
-                        auxData.AuxPrefabManager?.UpdatePet(
-                            petNameTextBox.Text,
-                            allPetColors[petColorComboBox.SelectedIndex],
-                            GeneratePetTalentLists());
-                        item = new(objectID: (int)allPetTypes[petKindComboBox.SelectedIndex],
-                            amount: (int)petExpNumeric.Value,
-                            variation: 0);
-                        objectName = Enum.GetNames(typeof(PetId))[petKindComboBox.SelectedIndex];
 
+                        var petItem = petEditControl.PetItem;
+                        objectName = petItem.objectName;
                         // ItemAuxDataを込みで書きこむ
-                        result = _saveDataManager.WriteItemData(inventoryIndexComboBox.SelectedIndex, item, objectName, auxData);
+                        result = _saveDataManager.WriteItemData(inventoryIndexComboBox.SelectedIndex, petItem.Info, objectName, petItem.Aux);
                         break;
 
                     case "advancedTab":
@@ -502,15 +436,7 @@ namespace CKFoodMaker
             return new(objectID: objectIdTextBox.Text, amount: amoutTextBox.Text, variation: variationTextBox.Text);
         }
 
-        private List<PetTalent> GeneratePetTalentLists()
-        {
-            var talents = petSkillTableLayoutPanel.Controls.Cast<PetTalentControl>()
-                .OrderBy(control => control.SlotNo)
-                .Select(control => control.Talent)
-                .ToList();
-
-            return talents;
-        }
+        
 
         private async void EnableResultMessage(string message)
         {
@@ -658,33 +584,6 @@ namespace CKFoodMaker
         {
             MessageBox.Show("未作成の料理の組み合わせを出力します。");
             _saveDataManager.ListUncreatedRecipes();
-        }
-
-        private void petKindComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            petColorComboBox.Items.Clear();
-
-            var allPetType = Enum.GetValues<PetId>();
-            var petTabDic = Enumerable.Range(0, allPetType.Length - 1)
-                .Select(i => (i, allPetType[i]))
-                .ToDictionary();
-            var colorDic = Enumerable.Range(0, Enum.GetValues<PetColor>().Length - 1)
-                .Select(i => (i, Enum.GetValues<PetColor>()[i]))
-                .ToDictionary();
-            //多色ペット判定
-            if (new int[] { 0, 1, 2, 4, 9, 10 }.Contains(petKindComboBox.SelectedIndex))
-            {
-                foreach (var color in Enum.GetValues<PetColor>())
-                {
-                    petColorComboBox.Items.Add(PetResource.ColorDict[(allPetType[petKindComboBox.SelectedIndex], color)]);
-                }
-            }
-            else
-            {
-                // スライム系
-                petColorComboBox.Items.Add(PetResource.ColorDict[(allPetType[petKindComboBox.SelectedIndex], PetColor.Color_1)]);
-            }
-            petColorComboBox.SelectedIndex = 0;
         }
 
         private void openConditionsButton_Click(object sender, EventArgs e)
